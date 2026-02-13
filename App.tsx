@@ -174,59 +174,95 @@ export default function App() {
 
   return (
     <div className="flex flex-col h-screen bg-black text-white overflow-hidden font-sans">
-      {/* Premium Header matching Screenshot */}
-      <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-black/60 backdrop-blur-xl z-50">
-        <div className="flex items-center gap-8">
+      {/* Header */}
+      <header className="h-16 flex items-center justify-between px-6 border-b border-white/5 bg-black/80 backdrop-blur-xl z-50">
+        <div className="flex items-center gap-6">
           <h1 className="text-2xl font-black text-netflix tracking-tighter cursor-default select-none">StreamSync</h1>
-          <div className="flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
-            <button onClick={() => setShowUrlInput(true)} className="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors">YouTube</button>
-            <button onClick={() => fileInputRef.current?.click()} className="px-4 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors">Local File</button>
+          <div className="hidden md:flex items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+            <button onClick={() => setShowUrlInput(true)} className="px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors">YouTube</button>
+            <button onClick={() => fileInputRef.current?.click()} className="px-4 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-white/10 transition-colors">File</button>
           </div>
         </div>
         
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-green-500/10 border border-green-500/20 rounded-full">
             <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
-            <span className="text-[9px] font-black text-green-500 uppercase tracking-widest">Live Sync</span>
+            <span className="text-[9px] font-black text-green-500 uppercase tracking-widest">Synced</span>
           </div>
-          <button onClick={() => { navigator.clipboard.writeText(window.location.href); setCopyStatus(true); setTimeout(() => setCopyStatus(false), 2000); }} className="glass px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95">{copyStatus ? 'COPIED!' : 'INVITE'}</button>
+          <button 
+            onClick={() => { navigator.clipboard.writeText(window.location.href); setCopyStatus(true); setTimeout(() => setCopyStatus(false), 2000); }} 
+            className="glass px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95"
+          >
+            {copyStatus ? 'COPIED!' : 'INVITE'}
+          </button>
         </div>
       </header>
 
       <main className="flex-1 flex flex-col relative overflow-hidden">
-        {/* Top FaceTime Grid exactly like Screenshot */}
+        {/* Optional FaceTime Grid: Only visible when call is active or requested */}
         <RealtimeVideoChat partyId={partyId} userId={userId} />
 
         {/* Content Area */}
         <div className="flex-1 relative bg-black group overflow-hidden">
-          <MediaPlayer playerState={playerState} onStateUpdate={updateRemotePlayerState} onDuration={(d) => setPlayerState(prev => ({ ...prev, duration: d }))} containerRef={containerRef} />
+          <MediaPlayer 
+            playerState={playerState} 
+            onStateUpdate={updateRemotePlayerState} 
+            onDuration={(d) => setPlayerState(prev => ({ ...prev, duration: d }))} 
+            containerRef={containerRef} 
+          />
           
           {!playerState.src && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 z-30 p-6">
-              <div className="w-16 h-16 mb-4 opacity-20 border-4 border-white rounded-xl flex items-center justify-center">
-                <div className="w-8 h-8 border-2 border-white rounded-sm"></div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/90 z-30 p-6">
+              <div className="w-16 h-16 mb-6 opacity-10 border-4 border-white rounded-3xl flex items-center justify-center">
+                <div className="w-8 h-8 border-2 border-white rounded-lg"></div>
               </div>
-              <p className="font-black uppercase tracking-[0.3em] text-[10px] text-gray-500">No video selected.</p>
+              <p className="font-black uppercase tracking-[0.4em] text-[11px] text-gray-600 mb-8">Select content to begin</p>
+              <div className="flex gap-4">
+                <button onClick={() => setShowUrlInput(true)} className="bg-white text-black px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">YT Search</button>
+                <button onClick={() => fileInputRef.current?.click()} className="bg-white/10 text-white px-6 py-3 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all">Upload File</button>
+              </div>
             </div>
           )}
 
-          <div className="absolute inset-x-0 bottom-0 z-20 transition-opacity">
-            <VideoControls state={playerState} onPlayPause={() => updateRemotePlayerState({ isPlaying: !playerState.isPlaying })} onSeek={(o) => updateRemotePlayerState({ currentTime: Math.max(0, playerState.currentTime + o) })} onSeekTo={(t) => updateRemotePlayerState({ currentTime: t })} onVolumeChange={(v) => setPlayerState(prev => ({ ...prev, volume: v }))} onToggleMute={() => setPlayerState(prev => ({ ...prev, muted: !prev.muted }))} onFullScreen={() => containerRef.current?.requestFullscreen()} />
+          {/* Controls appear on hover */}
+          <div className="absolute inset-x-0 bottom-0 z-20 pointer-events-none group-hover:pointer-events-auto transition-opacity">
+            <VideoControls 
+              state={playerState} 
+              onPlayPause={() => updateRemotePlayerState({ isPlaying: !playerState.isPlaying })} 
+              onSeek={(o) => updateRemotePlayerState({ currentTime: Math.max(0, playerState.currentTime + o) })} 
+              onSeekTo={(t) => updateRemotePlayerState({ currentTime: t })} 
+              onVolumeChange={(v) => setPlayerState(prev => ({ ...prev, volume: v }))} 
+              onToggleMute={() => setPlayerState(prev => ({ ...prev, muted: !prev.muted }))} 
+              onFullScreen={() => containerRef.current?.requestFullscreen()} 
+            />
           </div>
         </div>
       </main>
 
+      {/* Persistent Chat - Users can chat while watching without FaceTime */}
       <FloatingChat messages={messages} onSendMessage={handleSendMessage} />
+      
       <input ref={fileInputRef} type="file" accept="video/*" onChange={handleFileUpload} className="hidden" />
 
       {showUrlInput && (
-        <div className="fixed inset-0 bg-black/95 z-[100] flex items-center justify-center p-6 backdrop-blur-3xl">
-          <div className="w-full max-w-lg space-y-6">
-            <h3 className="text-2xl font-black">Load Content</h3>
-            <input type="text" autoFocus value={urlInput} onChange={(e) => setUrlInput(e.target.value)} placeholder="https://youtube.com/..." className="w-full bg-gray-900 border border-white/10 rounded-xl px-6 py-4 text-white outline-none focus:ring-2 focus:ring-blue-600" onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()} />
+        <div className="fixed inset-0 bg-black/98 z-[100] flex items-center justify-center p-6 backdrop-blur-3xl">
+          <div className="w-full max-w-lg space-y-8 animate-in fade-in zoom-in duration-300">
+            <div className="space-y-2">
+              <h3 className="text-3xl font-black tracking-tighter">Load Media</h3>
+              <p className="text-gray-500 text-sm font-medium">Enter a YouTube URL to sync across all devices.</p>
+            </div>
+            <input 
+              type="text" 
+              autoFocus 
+              value={urlInput} 
+              onChange={(e) => setUrlInput(e.target.value)} 
+              placeholder="https://youtube.com/watch?v=..." 
+              className="w-full bg-white/5 border border-white/10 rounded-[1.5rem] px-8 py-5 text-white outline-none focus:ring-4 focus:ring-netflix/20 transition-all text-lg font-medium" 
+              onKeyDown={(e) => e.key === 'Enter' && handleUrlSubmit()} 
+            />
             <div className="flex gap-4">
-              <button onClick={() => setShowUrlInput(false)} className="flex-1 py-4 glass rounded-xl font-bold">CANCEL</button>
-              <button onClick={handleUrlSubmit} className="flex-1 py-4 bg-blue-600 rounded-xl font-bold">LOAD</button>
+              <button onClick={() => setShowUrlInput(false)} className="flex-1 py-5 glass rounded-[1.5rem] text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-all">Cancel</button>
+              <button onClick={handleUrlSubmit} className="flex-1 py-5 bg-netflix text-white rounded-[1.5rem] text-xs font-black uppercase tracking-widest shadow-2xl shadow-netflix/20 hover:scale-[1.02] transition-all">Play Now</button>
             </div>
           </div>
         </div>
