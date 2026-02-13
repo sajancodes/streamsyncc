@@ -1,0 +1,36 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Rooms collection: shared state for watch parties
+    match /rooms/{roomId} {
+      // Allow anyone with the Room ID to read the state
+      allow read: if true;
+      
+      // Allow creation if the room has the required initial schema
+      allow create: if request.resource.data.keys().hasAll(['users', 'playerState'])
+                   && request.resource.data.playerState.isPlaying is bool
+                   && request.resource.data.users is map; 
+      
+      // Allow updating specific fields (syncing player or joining users)
+      allow update: if request.resource.data.diff(resource.data).affectedKeys()
+        .hasAny(['users', 'playerState', 'lastActivity']);
+      
+      // Messages sub-collection: per-room chat history
+      match /messages/{messageId} {
+        // Chat is readable by party members
+        allow read: if true;
+        
+        // Strict validation for message creation
+        allow create: if request.resource.data.keys().hasAll(['sender', 'text', 'type', 'timestamp'])
+                     && request.resource.data.sender is string
+                     && request.resource.data.text is string
+                     && request.resource.data.text.size() > 0
+                     && request.resource.data.text.size() < 1000
+                     && request.resource.data.type in ['USER', 'SYSTEM', 'AI'];
+        
+        // Chat history is immutable for security and audit
+        allow update, delete: if false;
+      }
+    }
+  }
+}

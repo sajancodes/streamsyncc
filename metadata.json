@@ -1,0 +1,8 @@
+{
+  "name": "StreamSync - Watch Party",
+  "description": "Real-time watch party app supporting YouTube and local high-quality video playback with integrated video chat.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
