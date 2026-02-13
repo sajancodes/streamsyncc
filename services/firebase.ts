@@ -1,6 +1,7 @@
 
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getDatabase } from "firebase/database";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
@@ -13,12 +14,8 @@ const firebaseConfig = {
   measurementId: "G-026ZVBZ2D7"
 };
 
-// Initialize Firebase App
 const app = initializeApp(firebaseConfig);
 
-// Initialize and Export Firestore
-// Correctly obtain firestore instance from the initialized app for modular SDK usage
 export const db = getFirestore(app);
-
-// Initialize Analytics (browser-only)
+export const rtdb = getDatabase(app);
 export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;

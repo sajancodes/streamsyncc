@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { ChatSidebar } from './components/ChatSidebar';
-import { WebcamGrid } from './components/WebcamGrid';
+import { RealtimeVideoChat } from './components/RealtimeVideoChat';
 import { VideoControls } from './components/VideoControls';
 import { MediaPlayer } from './components/MediaPlayer';
 import { Message, MessageType, PlayerState, User, VideoSource } from './types';
@@ -62,7 +63,6 @@ export default function App() {
 
   const [playerState, setPlayerState] = useState<PlayerState>(INITIAL_PLAYER_STATE);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [users, setUsers] = useState<User[]>([]);
   const [showUrlInput, setShowUrlInput] = useState(false);
   const [urlInput, setUrlInput] = useState('');
   const [isWebcamExpanded, setIsWebcamExpanded] = useState(true);
@@ -104,17 +104,6 @@ export default function App() {
             return prev;
           });
         }
-        if (data.users && typeof data.users === 'object') {
-          const userList: User[] = Object.entries(data.users).map(([id, u]: [string, any]) => ({
-            id,
-            name: u.name || 'Anonymous',
-            avatar: u.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${id}`,
-            isSelf: id === userId,
-            isMuted: !!u.isMuted,
-            isVideoOff: !!u.isVideoOff
-          }));
-          setUsers(userList);
-        }
       }
     }, (error) => {
       console.error("Room snapshot error:", error);
@@ -143,7 +132,7 @@ export default function App() {
       unsubscribeRoom();
       unsubscribeMsgs();
     };
-  }, [hasJoined, partyId, userId]);
+  }, [hasJoined, partyId]);
 
   const handleJoin = async () => {
     if (!userName.trim() || isJoining) return;
@@ -157,8 +146,6 @@ export default function App() {
       const userData = {
         name: userName,
         avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${userId}`,
-        isMuted: false,
-        isVideoOff: false,
         lastSeen: serverTimestamp()
       };
 
@@ -263,7 +250,7 @@ export default function App() {
               StreamSync Live
             </div>
             <h1 className="text-5xl font-black text-white tracking-tighter">Watch together.</h1>
-            <p className="text-gray-500 text-sm font-medium">Synced movie nights with friends.</p>
+            <p className="text-gray-500 text-sm font-medium">1:1 FaceTime & Sync Playback</p>
           </div>
 
           <div className="bg-gray-900/50 backdrop-blur-xl border border-white/10 p-8 rounded-[2.5rem] shadow-2xl space-y-6">
@@ -286,10 +273,6 @@ export default function App() {
               {isJoining ? 'PREPARING SESSION...' : 'JOIN PARTY'}
             </button>
           </div>
-
-          <p className="text-center text-[10px] text-gray-700 font-bold uppercase tracking-widest">
-            End-to-end synchronized playback
-          </p>
         </div>
       </div>
     );
@@ -298,10 +281,11 @@ export default function App() {
   return (
     <div className="flex h-screen bg-black text-white overflow-hidden font-sans">
       <div className="flex-1 flex flex-col relative">
-        <WebcamGrid 
-          users={users} 
-          isExpanded={isWebcamExpanded} 
-          toggleExpanded={() => setIsWebcamExpanded(!isWebcamExpanded)} 
+        <RealtimeVideoChat 
+          partyId={partyId} 
+          userId={userId} 
+          isExpanded={isWebcamExpanded}
+          toggleExpanded={() => setIsWebcamExpanded(!isWebcamExpanded)}
         />
         
         <div className="flex-1 relative group bg-black">
