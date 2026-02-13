@@ -1,8 +1,6 @@
-
-import { initializeApp } from "firebase/app";
+import { initializeApp, getApps, getApp } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getDatabase } from "firebase/database";
-import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBlFk2TjG9MB2a0GrIrJNXfWFM-OBxNYTs",
@@ -14,8 +12,7 @@ const firebaseConfig = {
   measurementId: "G-026ZVBZ2D7"
 };
 
-const app = initializeApp(firebaseConfig);
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 
 export const db = getFirestore(app);
 export const rtdb = getDatabase(app);
-export const analytics = typeof window !== 'undefined' ? getAnalytics(app) : null;
